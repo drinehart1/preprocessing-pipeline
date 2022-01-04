@@ -5,15 +5,19 @@ import socket
 from pathlib import Path
 from skimage import io
 from PIL import Image
-Image.MAX_IMAGE_PIXELS = None
+
 import cv2
 import numpy as np
 import gc
 from skimage.transform import rescale
 from concurrent.futures.process import ProcessPoolExecutor
 # from fixes.split_save import img
+
 PIPELINE_ROOT = Path('.').absolute().parent
 sys.path.append(PIPELINE_ROOT.as_posix())
+print('PIPELINE_ROOT', PIPELINE_ROOT)
+PYTHONPATH = os.getenv("PYTHONPATH")
+print('PYTHONPATH', PYTHONPATH)
 
 from lib.file_location import FileLocationManager
 from lib.sqlcontroller import SqlController
@@ -117,8 +121,10 @@ def test_dir(animal, directory, downsample=True, same_size=False):
         max_width = 0
         min_height = 0
         max_height = 0
+    file_len = len(files)
     if section_count != len(files):
-        error += f"Number of files in {directory} is incorrect.\n"
+        # MORE VERBOSE ERROR MESSAGE
+        error += f"Number of files in {directory} is incorrect. [SECTION_COUNT: {section_count} <> FILE_COUNT: {file_len}]\n"
     if min_width != max_width and min_width > 0 and same_size:
         error += f"Widths are not of equal size, min is {min_width} and max is {max_width}.\n"
     if min_height != max_height and min_height > 0 and same_size:
@@ -159,8 +165,13 @@ def make_tifs(animal, channel,workers = 10):
     for section in sections:
         input_path = os.path.join(INPUT, section.czi_file)
         output_path = os.path.join(OUTPUT, section.file_name)
-        cmd = ['/usr/local/share/bftools/bfconvert', '-bigtiff', '-separate', '-series', str(section.scene_index),
-                '-compression', 'LZW', '-channel', str(section.channel_index),  '-nooverwrite', input_path, output_path]
+
+        ext_app = os.path.join(os.getenv('BFTOOLS_PATH'), 'bfconvert')
+        cmd = [ext_app, '-bigtiff', '-separate', '-series', str(section.scene_index),
+               '-compression', 'LZW', '-channel', str(section.channel_index), '-nooverwrite', input_path, output_path]
+
+        # cmd = ['/usr/local/share/bftools/bfconvert', '-bigtiff', '-separate', '-series', str(section.scene_index),
+        #         '-compression', 'LZW', '-channel', str(section.channel_index),  '-nooverwrite', input_path, output_path]
         if not os.path.exists(input_path):
             continue
 
@@ -226,8 +237,13 @@ def make_tif(animal, tif_id, file_id, testing=False):
     if testing:
         command = ['touch', tif_file]
     else:
-        command = ['/usr/local/share/bftools/bfconvert', '-bigtiff', '-separate', '-compression', 'LZW',
-                                  '-series', str(tif.scene_index), '-channel', str(tif.channel-1), '-nooverwrite', czi_file, tif_file]
+
+        ext_app = os.path.join(os.getenv('BFTOOLS_PATH'), 'bfconvert')
+        command = [ext_app, '-bigtiff', '-separate', '-compression', 'LZW', '-series', str(tif.scene_index), '-channel', str(tif.channel-1), '-nooverwrite', czi_file, tif_file]
+        print("COMMAND:", command)
+
+        # command = ['/usr/local/share/bftools/bfconvert', '-bigtiff', '-separate', '-compression', 'LZW',
+        #                           '-series', str(tif.scene_index), '-channel', str(tif.channel-1), '-nooverwrite', czi_file, tif_file]
     run(command)
 
     end = time.time()

@@ -1,9 +1,24 @@
 import os
+import yaml
 
+# LOAD ENVIRONNMENT VARIABLES FROM .env FILE
+from dotenv import load_dotenv
+load_dotenv()
 
-DATA_PATH = '/net/birdstore/Active_Atlas_Data/data_root'
+# CONSOLIDATE CODE FROM sql_setup.py
+#### CONSOLIDATE START
+dirname = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..','..'))
+file_path = os.path.join(dirname, 'parameters.yaml')
+
+try:
+    with open(file_path, 'r') as stream:
+        parameters = yaml.safe_load(stream)
+except FileNotFoundError:
+    print("MISSING FILE:", file_path)
+
+DATA_PATH = os.environ.get('DATA_PATH')
 ROOT_DIR = os.path.join(DATA_PATH, 'pipeline_data')
-
+#### CONSOLIDATE END
 
 class FileLocationManager(object):
     """ Create a class for processing the pipeline,

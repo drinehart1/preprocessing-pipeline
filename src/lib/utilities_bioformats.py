@@ -1,5 +1,6 @@
 import subprocess
 import bioformats
+import os
 
 def get_czi_metadata(infile):
     """
@@ -7,7 +8,11 @@ def get_czi_metadata(infile):
     :param infile: file location of the CZI file
     :return: dictionary of meta information
     """
-    command = ['/usr/local/share/bftools/showinf', '-nopix', '-omexml-only', infile]
+
+    ext_app = os.path.join(os.getenv('BFTOOLS_PATH'), 'showinf')
+
+    command = [ext_app, '-nopix', '-omexml-only', infile]
+    print("COMMAND:",command)
     metadata = subprocess.check_output(command).decode('utf-8')
     metadata = bioformats.OMEXML(metadata)
 

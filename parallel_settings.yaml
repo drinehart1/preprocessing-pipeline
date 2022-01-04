@@ -1,4 +1,4 @@
-name: "muralis"
+name: "ucsd1"
 create_tifs: (40,40)
 create_preps : (60,60)
 create_mask : (60,60)

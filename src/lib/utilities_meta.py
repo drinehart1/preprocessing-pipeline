@@ -41,7 +41,9 @@ def make_meta(animal):
         if extension.endswith('czi'):
             slide = Slide()
             slide.scan_run_id = scan_id
-            slide.slide_physical_id = int(re.findall(r'\d+', czi_file)[1])
+            print(czi_file)
+            slide.slide_physical_id = re.findall(r'\d+', czi_file)
+            #slide.slide_physical_id = int(re.findall(r'\d+', czi_file)[1])
             slide.rescan_number = "1"
             slide.slide_status = 'Good'
             slide.processed = False

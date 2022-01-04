@@ -5,10 +5,16 @@ from sqlalchemy.orm import sessionmaker
 #import datajoint as dj
 import os
 
+#### CONSOLIDATE START REF: lib/file_location.py
 dirname = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..','..'))
 file_path = os.path.join(dirname, 'parameters.yaml')
-with open(file_path) as file:
-    parameters = yaml.load(file, Loader=yaml.FullLoader)
+
+try:
+    with open(file_path, 'r') as stream:
+        parameters = yaml.safe_load(stream)
+except FileNotFoundError:
+    print("MISSING FILE:", file_path)
+#### CONSOLIDATE END
 
 user = parameters['user']
 password = parameters['password']

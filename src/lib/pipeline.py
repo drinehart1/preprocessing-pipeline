@@ -26,7 +26,6 @@ from lib.utilities_downsampling import create_downsamples
 import yaml
 import socket
 
-
 class Pipeline:
     '''
     A class that sets the methods and attributes for the Active Brain Atlas
@@ -52,6 +51,7 @@ class Pipeline:
         file_path = os.path.join(dirname, 'parallel_settings.yaml')
         with open(file_path) as file:
             self.parallel_settings = yaml.load(file, Loader=yaml.FullLoader)
+        # COULD WE USE GENERIC SET OF PARAMETERS?
         assert self.parallel_settings['name'] == self.hostname
 
     def get_hostname(self):
@@ -218,15 +218,21 @@ class Pipeline:
         If it doesn't work, check the workernoshell.err.log
         for more info in the base directory of this program
         '''
-        os.environ["_JAVA_OPTIONS"] = "-Xmx10g"
-        os.environ["export CV_IO_MAX_IMAGE_PIXELS"] = '21474836480'
-        
+
+        # REMOVE: DUANE
+        #os.environ["_JAVA_OPTIONS"] = "-Xmx10g"
+        #os.environ["export CV_IO_MAX_IMAGE_PIXELS"] = '21474836480'
+
+        file_showinf = os.path.join(os.getenv('BFTOOLS_PATH'), 'showinf')
+        file_bfconvert = os.path.join(os.getenv('BFTOOLS_PATH'), 'bfconvert')
+        #file_identify = os.path.join(IMAGEMAGIK_PATH, 'identify') # MAINLY FOR WINDOWS INSTALLATIONS (NOT CURRENTLY IMPLEMENTED)
+
         error = ""
-        if not os.path.exists('/usr/local/share/bftools/showinf'):
+        if not os.path.exists(file_showinf) or os.path.exists('/usr/local/share/bftools/showinf'):
             error += "showinf in bftools is not installed"
-        if not os.path.exists('/usr/local/share/bftools/bfconvert'):
+        if not os.path.exists(file_bfconvert) or os.path.exists('/usr/local/share/bftools/bfconvert'):
             error += "\nbfconvert in bftools is not installed"
-        if not os.path.exists('/usr/bin/identify'):
+        if not which("identify") or not os.path.exists('/usr/bin/identify'):
             error += "\nImagemagick is not installed"
         if not which("java"):
             error += "\njava is not installed"
@@ -234,5 +240,3 @@ class Pipeline:
         if len(error) > 0:
             print(error)
             sys.exit()
-
-        
